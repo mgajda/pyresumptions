@@ -9,10 +9,10 @@ MAX_DATA_STRING = 80
 
 # Storing variables
 def storeAsString(self, varName):
-  return ("", varName + "=" + repr(self))
+  return (""                          , varName + "=" + repr(self))
 
 def storeAsVar(self, varName):
-  return (varName + " = " + repr(self), varName)
+  return (varName + " = " + repr(self), varName                   )
 
 def writeTextFile(self, filename):
     with open(filename, "w") as outf:
@@ -25,57 +25,78 @@ def storeAsFile(self, varName, extension="in", writer=writeTextFile, readerName=
 def storeAsPickle(self, varName, extension="in_pickle"):
     storeAsFile(self, varName, extension, writer=pickle.dump, readerName="pickle.load")
 
-def printResumption(logger, func, args, kwargs):
-    print("printResumption args: ", args, "kwargs: ", kwargs)
+def indentedPrint(indent=2, aPrint=print, *args):
+    aPrint(" "*indent, *args)
+
+def printResumption(func, args, kwargs, logger=print):
+    "Prints a resumption: function call with all its arguments."
     code = func.__code__
     varDecls   = []
     formalArgs = []
-    print("func:", dir(func))
-    print("code:", dir(func.__code__))
-    print("ARGS... ", code.co_varnames, code.co_argcount, args, kwargs)
     argNames = code.co_varnames[:code.co_argcount]
-    print("argNames: ", argNames, " arg values: ", args)
-    print(list(zip(argNames, args)))
-    #print(kwargs.items())
-    namedArgs = list(zip(code.co_varnames[:code.co_argcount], args)) + list(kwargs.items())
+    namedArgs = (list(zip(code.co_varnames[:code.co_argcount], args)) +
+                 list(kwargs.items()))
     for (argName, argValue) in namedArgs:
-        (varDecl, formalArg) = store(argName, argValue)
+        (varDecl, formalArg) = store(argValue, argName)
         varDecls.append(varDecl)
         formalArgs.append(formalArg)
     call = func.__qualname__ + "(" + ",".join(formalArgs) + ")"
-    print("CALL:", call)
-    logger("\n".join([call] + varDecls))
+    varDecls.append(call)
+    logger("\n".join(varDecls))
 
-def store(argName, argValue):
+def store(argValue, argName):
     if hasattr(argValue, "store"):
-        argValue.store(argName)
+        return argValue.store(argName)
     else:
-        primTypes = [int, float, str]
-        if type(argValue) in primTypes:
-            r = repr(argValue)
-            if len(r) < MAX_ARG_STRING:
-                return storeAsString(argValue, argName)
-            else:
-                return storeAsVar   (argValue, argName)
-        else:
-            return storeAsPickle    (argValue, argName)
+        return _store(argValue, argName)
 
+def storedFileExtension(argValue):
+    if hasattr(argValue, "storedFileExtension"):
+        return   argValue.storedFileExtension(argName)
+    else:
+        if type(argValue) in _typesStoredAsRepr:
+            return   "in"
+        else:
+            return   "in_pickle"
+
+"Primitive types (those without .store method), which can be stored directly as their repr."
+_typesStoredAsRepr = [int, float, str]
+
+def _store(argValue, argName):
+    "Store a primitive type (one of these that cannot have .store method added.)"
+    global _typesStoredAsRepr
+    if type(argValue) in _typesStoredAsRepr:
+        r = repr(argValue)
+        if len(r) < MAX_ARG_STRING:
+            return storeAsString(argValue, argName)
+        else:
+            return storeAsVar   (argValue, argName)
+    else:
+        return     storeAsPickle(argValue, argName)
+
+def checkpoint(logger=print):
+    "Checkpoint the function call upon each run, so that it may be resumed."
+    def _wrapped(func, *args, **kwargs):
+         printResumption(func, args, kwargs, logger=logger)
+         func(*args, **kwargs)
+    return decorator(_wrapped)
 
 def resumable(logger=print):
+    "This function is resumable upon exception."
     def _wrapped(func, *args, **kwargs):
         try:
-            print("args: ", args, "kwargs: ", kwargs)
             func(*args, **kwargs)
         except Exception:
-            print("RESUMPTION:::")
             printResumption(logger, func, args, kwargs)
             raise
     return decorator(_wrapped)
-    #result.__qualname__ = func.__qualname__
 
 class Storable(object):
     def extension(self):
         return "in"
+    def stored(self):
+        return pickle.dumps(self)
+    # FIXME: testName in store()
     def store(self, testName, argName):
         varName = testName + "_" + argName
         result = self.stored()
@@ -87,33 +108,21 @@ class Storable(object):
             filename = varName + "." + self.extension()
             storeToFile(self, filename)
             return (varName + " = pickle.load(" + repr(filename) + ")", varName)
-    def storeToFile(self, filenameSeed):
-        raise NotImplementedError
-    def stored(self):
-        raise NotImplementedError
-
-class TextStorable(object):
-    storableExtension = "in"
-    def storeToFile(self, filenameSeed):
-        if self.isBinaryStorable():
-          filename = varName + ".in_pickle"
-          pickle.dump(self, filename)
-        else:
-          filename = varName + ".in"
-          with open(filename, "w") as outf:
-            outf.write(self.stored())
-
-class BinStorable(object):
-    def filenameExtension():
-      return "in_pickle"
-    def store(self, testName, argName):
-        pass
 
 if __name__ == "__main__":
-    @resumable()
+    print ("Unit testing resumptions.")
     def sampleFun(alpha, beta="default string"):
-        print(alpha, beta)
+        print("Executing sampleFun: ", alpha, beta)
         return len(beta)
-    sampleFun(1)    # does nothing (finishes correctly)
-    sampleFun(2, 3) # should print exception and its resumption
+    aResumable  = resumable ()(sampleFun)
+    aCheckpoint = checkpoint()(sampleFun)
+    aResumable(1, "eeee")    # does nothing (finishes correctly)
+    try:
+        aResumable(2, 3) # should print exception and its resumption
+        raise NotImplementedError()
+    except:
+        pass # correct behaviour
+    _mediumString = "alphabetic, but not frenetic, crowdy, but not bawdy, exceptional, and not geminal"
+    _longString   = 3*_mediumString
+    aCheckpoint(_mediumString, _longString)
 
