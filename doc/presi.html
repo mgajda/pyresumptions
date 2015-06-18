@@ -133,13 +133,7 @@ class: center, middle
 
 # Problem naming:
 
-Intent -&gt; Plan -&gt; Implementation -&gt; Execution -&gt; Observed result
-   |       |              |            |               |
-Wrong     Faulty          |         Runtime      Discrepancy
-specs     plan (algo)     |         error        between desired
-                          |                      and observed
-                          |                      result
-                    Coding error                 (Performance bug)
+![Programming process](typesOfBugs.svg) 
 ---
 # Hierarchical view
 
@@ -148,48 +142,52 @@ specs     plan (algo)     |         error        between desired
 ---
 # Bug fixing
 
-Find the level:
+# Find the level:
 * of hierarchy where bug occurs,
 * component,
 * type,
 * define desired behaviour.
 
-Technical goals:
+# Technical goals:
 * minimize impact of bugs
 * feedback loop time
 * debug cycle
+---
+# Running the pipeline
 
-## Running the pipeline
+* Size of the data
+* Number of exceptions
+* Debug cycle issues
+* Division into stages
+---
+# Finding root causes
 
-Size of the data
-Number of exceptions
-Debug cycle issues
-Division into stages
-
-### Finding root causes
-
+# Root cause analysis
 * Primary vs secondary (fallout) exceptions
 * Valid exceptions
 * Importance of exceptions
   - statistical (number of occurences)
   - behavioural (qualitative change in result)
 
-Run cycle:
+---
+# Finding root causes - cycle
+
+# Run cycle:
 * Run on valid data set
 * Identify problems
 * Estimate problem impact
 * Isolate most important problems
 * Benchmarking change results (compare with previous run)
 
-Isolation -> self-contained unit tests
-
-### tracebacker.py
+# Isolation - making self-contained unit tests
+---
+# tracebacker.py
 
 1. Gathering tests.
 2. Assigning order of exceptions.
 3. Classifying by number and order.
-
-## Isolation using decorators
+---
+# Isolation using decorators
 
 * History of checkpointing
   - CRAY
@@ -201,7 +199,8 @@ Isolation -> self-contained unit tests
   - define data formats for examination
   - minimal unit test isolation
 
-### Implementation
+---
+# Implementation
 
 1. Save inputs
 2. Identify call
@@ -209,9 +208,10 @@ Isolation -> self-contained unit tests
 4. Resumptions as unit tests
 5. Upgrade tracebacker.py to deal with resumptions
 
-## Conclusion
+---
+# Conclusion
 
-Strengths of Python:
+# Strengths of Python:
 * rapid development
 * easy gluing
 * metamodel for execution
