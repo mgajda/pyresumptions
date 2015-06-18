@@ -1,0 +1,51 @@
+digraph "Programming process in detail" {
+  rankdir=LR;
+//	Intent -> Implementation -> Observed result;
+  
+  subgraph Overall {
+    label="Overall program";
+    Intent1 -> Plan1 -> Implementation1 -> Execution1 -> Result1;
+    Intent1	    [label="Intent"];
+    Plan1	    [label="Plan"];
+    Implementation1 [label="Implementation"];
+    Execution1	    [label="Execution"];
+    Result1	    [label="Observed result"];
+    rank=same;
+  }
+  subgraph Module {
+    label="Module level";
+    Intent2 -> Plan2 -> Implementation2 -> Execution2 -> Result2;
+    Intent2	    [label="Intent"];
+    Plan2	    [label="Plan"];
+    Implementation2 [label="Implementation"];
+    Execution2	    [label="Execution"];
+    Result2	    [label="Observed result"];
+    rank=same;
+  }
+  Plan1 -> Intent2;
+  Execution2 -> Implementation1; 
+  subgraph Class {
+    label="Class level";
+    Intent3 -> Plan3 -> Implementation3 -> Execution3 -> Result3;
+    Intent3	    [label="Intent"];
+    Plan3	    [label="Plan"];
+    Implementation3 [label="Implementation"];
+    Execution3	    [label="Execution"];
+    Result3	    [label="Observed result"];
+    rank=same;
+  }
+  Plan2 -> Intent3;
+  Execution3 -> Implementation2;
+  subgraph Method {
+    label="Method or function level";
+    Intent4 -> Plan4 -> Implementation4 -> Execution4 -> Result4;
+    Intent4	    [label="Intent"];
+    Plan4	    [label="Plan"];
+    Implementation4 [label="Implementation"];
+    Execution4	    [label="Execution"];
+    Result4	    [label="Observed result"];
+    rank=same;
+  }
+  Plan3 -> Intent4;
+  Execution4 -> Implementation3;
+}

@@ -1,0 +1,3 @@
+[submodule "remarkjs"]
+	path = doc/remark
+	url = https://github.com/gnab/remark.git

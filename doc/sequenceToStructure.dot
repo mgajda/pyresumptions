@@ -1,0 +1,6 @@
+digraph {
+  DNA     -> DNA       [label="Genetic\ninheritance"];
+  DNA     -> RNA       [label="Translation\nin nucleus"];
+  RNA     -> Protein   [label="Transcription\nin ribosome"];
+  Protein -> Phenotype [label="Biochemical\nprocesses\nin cells"]
+}
