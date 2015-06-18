@@ -1,0 +1,14 @@
+digraph typesOfBugs {
+  subgraph {
+    Intent -> Plan -> Implementation -> Execution -> "Observed result";
+    rank=same;
+  }
+  subgraph {
+    "Wrong\nspecification" -> Intent;
+    "Faulty plan\n(algorithm)" -> Plan;
+    "Coding\nerror" -> Implementation;
+    "Runtime\nerror" -> Execution;
+    "Discrepancy\nbetween desired\nand observed result\n(Performance bug)" -> "Observed result";
+  }
+}
+

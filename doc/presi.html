@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Title</title>
+    <meta charset="utf-8">
+    <style>
+      @import url(https://fonts.googleapis.com/css?family=Yanone+Kaffeesatz);
+      @import url(https://fonts.googleapis.com/css?family=Droid+Serif:400,700,400italic);
+      @import url(https://fonts.googleapis.com/css?family=Ubuntu+Mono:400,700,400italic);
+
+      body { font-family: 'Droid Serif'; }
+      h1, h2, h3 {
+        font-family: 'Yanone Kaffeesatz';
+        font-weight: normal;
+      }
+      .remark-code, .remark-inline-code { font-family: 'Ubuntu Mono'; }
+    </style>
+  </head>
+  <body>
+    <textarea id="source">
+
+class: center, middle
+
+# Debugging multi-gigabyte thousand cpu-hours analyses with Python decorators
+
+## Michal J. Gajda
+---
+# Plan
+
+# Intro
+# Problem
+# Solution
+---
+# Plan
+
+# Intro
+* My background
+* Problem background
+* Types of bugs
+
+# Problem
+
+# Solution
+---
+# Plan
+
+# Intro
+
+# Problem
+* Debug cycle
+* Parallel runs
+
+# Solution
+---
+# Plan
+
+# Intro
+
+# Problem
+
+# Solution
+* Bug isolation
+* Summarizing runs
+* Who writest the tests
+---
+# Intro
+
+# Scientific computing
+
+# Programming:
+* exploratory
+* test-driven
+* data-driven
+
+# Data analysis:
+* visual
+* statistical
+...
+---
+# Data analysis
+
+# Human analytic capacities
+
+| Method             | Focused capacity                           |
+|--------------------|--------------------------------------------|
+| human memory       | few kilobytes per second                   |
+| long term memory   | few pieces per day                         |
+| reading            | 1-20 words per second                      |
+| sound              | few words per second (less than reading)   |
+| graphics           | ~1-4Mpixel per second (for 1 frame/second) |
+| automatic analysis | everything beyond that                     |
+
+* GB of logs
+
+
+### Background
+
+# Structure-function relationship
+
+DNA -&gt; RNA -&gt; Protein
+
+* Anfinsen thesis
+
+Homology
+[http://persweb.wabash.edu/facstaff/novakw/ssf.jpg]()
+
+#### Protein modeling pipeline
+
+Initial sequence -&gt; Alignment (profile) -&gt; Protein hits
+
+#### CASP
+
+CASP dataset
+
+## Types of bugs
+---
+# Programming process
+
+![Programming process](progProcess.svg) 
+---
+# Programming process
+
+![Programming process](progProcessInDetail.svg) 
+---
+# Naming bugs
+
+# Problem naming:
+
+Intent -&gt; Plan -&gt; Implementation -&gt; Execution -&gt; Observed result
+   |       |              |            |               |
+Wrong     Faulty          |         Runtime      Discrepancy
+specs     plan (algo)     |         error        between desired
+                          |                      and observed
+                          |                      result
+                    Coding error                 (Performance bug)
+---
+#### Hierarchical view
+
+   Overall      High-level    Component    Functions
+                Design        Design
+     Intent
+       |
+     Plan       Intent
+       |          |
+       |        Plan
+       |
+      ...
+       |        
+       |
+     Execution
+
+### Bug fixing
+
+Find the level:
+* of hierarchy where bug occurs,
+* component,
+* type,
+* define desired behaviour.
+
+Technical goals:
+* minimize impact of bugs
+* feedback loop time
+* debug cycle
+
+## Running the pipeline
+
+Size of the data
+Number of exceptions
+Debug cycle issues
+Division into stages
+
+### Finding root causes
+
+* Primary vs secondary (fallout) exceptions
+* Valid exceptions
+* Importance of exceptions
+  - statistical (number of occurences)
+  - behavioural (qualitative change in result)
+
+Run cycle:
+* Run on valid data set
+* Identify problems
+* Estimate problem impact
+* Isolate most important problems
+* Benchmarking change results (compare with previous run)
+
+Isolation -> self-contained unit tests
+
+### tracebacker.py
+
+1. Gathering tests.
+2. Assigning order of exceptions.
+3. Classifying by number and order.
+
+## Isolation using decorators
+
+* History of checkpointing
+  - CRAY
+  - MD and QM simulations
+  - Core dumps
+  - Perl dumps
+  - Temporal debugging (e.g. like UndoDB)
+* Checkpointing vs resumptions
+  - define data formats for examination
+  - minimal unit test isolation
+
+### Implementation
+
+1. Save inputs
+2. Identify call
+3. Save exception
+4. Resumptions as unit tests
+5. Upgrade tracebacker.py to deal with resumptions
+
+## Conclusion
+
+Strengths of Python:
+* rapid development
+* easy gluing
+* metamodel for execution
+* decorators
+
+    </textarea>
+    <script src="https://gnab.github.io/remark/downloads/remark-latest.min.js">
+    </script>
+    <script>
+      var slideshow = remark.create();
+    </script>
+  </body>
+</html>
