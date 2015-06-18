@@ -1,0 +1,8 @@
+digraph {
+  rankdir=LR;
+  Sequence -> Profile    [label="Iterative\nprofile\nsearch"];
+  Profile  -> Structures [label="Sequence\nsearch\nover\nPDB"];
+  Structures             [label="Protein\nData\nBank\nstructures"];
+  Structures -> Models   [label="Sequence\nsimilarity\nas\nhomology\nrelationship"];
+  Models                 [label="Homology\nmodels"];
+}

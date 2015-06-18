@@ -1,6 +1,10 @@
-SOURCES=progProcess.dot         \
-	progProcessInDetail.dot \
-	typesOfBugs.dot
+SOURCES=progProcess.dot          \
+	progProcessInDetail.dot  \
+	typesOfBugs.dot          \
+	progProcessHierarchy.dot \
+	modelingPipeline.dot     \
+        sequenceToPhenotype.dot
+
 TARGETS=$(subst .dot,.png,$(SOURCES)) $(subst .dot,.svg,$(SOURCES))
 
 all: $(TARGETS)
