@@ -25,8 +25,8 @@ def storeAsFile(self, varName, extension="in", writer=writeTextFile, readerName=
 def storeAsPickle(self, varName, extension="in_pickle"):
     storeAsFile(self, varName, extension, writer=pickle.dump, readerName="pickle.load")
 
-def indentedPrint(indent=2, aPrint=print, *args):
-    aPrint(" "*indent, *args)
+#def indentedPrint(*args, indent=2, aPrint=print):
+#    aPrint(" "*indent, *args)
 
 def printResumption(func, args, kwargs, logger=print):
     "Prints a resumption: function call with all its arguments."
