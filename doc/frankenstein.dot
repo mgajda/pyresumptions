@@ -1,0 +1,31 @@
+digraph frankensteinStages {
+  subgraph {
+    label="Download inputs";
+    Metaserver -> Alignments -> Download;
+    Download [label="Download\nPDBs"];
+    rankdir=LR;
+  }
+  subgraph SingleTemplate {
+    BuildSingle [label="Build\nsingle\ntemplate\nmodels"];
+    BuildSingle -> "Score\nmodels" ->
+    "Pick best models" -> BestTemplatesAndPairwiseAlignments;
+    BestTemplateAndPairwiseAlignments [label="Build\nsingle\ntemplate\nmodels"];
+    rankdir=RL;
+  }
+  Download -> BuildSingle;
+  subgraph MultiTemplate {
+    BestTemplatesAndPairwiseAlignments -> "Multi-template\nalignment" -> OptimizeAlignment;
+    OptimizeAlignment [label="Optimize\nalignment"];
+    OptimizeAlignment -> "Score\nmulti-template\nalignments" -> BestAlignments;
+    BestAlignments    [label="Pick\nbest\nmulti-template\nvariations"];
+    BestAlignments -> MergeBest;
+    MergeBest         [label="Merge\nbest\nvariations"];
+    rankdir=LR;
+  }
+  subgraph FinalModeling {
+    FinalAlignment [label="Final alignments"];
+    FinalAlignment -> "Build\nfinal\nmodel" -> "Rank\nfinal\nmodels\non\ndifferent\ntemplates" -> "Send\nresult";
+    rankdir=RL;
+  }
+  MergeBest -> FinalAlignment
+}

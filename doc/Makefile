@@ -3,6 +3,7 @@ SOURCES=progProcess.dot          \
 	typesOfBugs.dot          \
 	progProcessHierarchy.dot \
 	modelingPipeline.dot     \
+	frankenstein.dot         \
         sequenceToPhenotype.dot
 
 TARGETS=$(subst .dot,.png,$(SOURCES)) $(subst .dot,.svg,$(SOURCES))
