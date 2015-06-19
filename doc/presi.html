@@ -214,7 +214,7 @@ class: center, middle
 1. Report all problematic data ASAP:
 ```python
 def function(input)
-  assert goodData(input)
+    assert goodData(input)
 ```
 2. Gather exception reports from all logs:
 ```
@@ -250,7 +250,7 @@ tracebacker.py *.log -o runReport.txt -t newTests.py
 ```python
 @resumable()
 def myBuggyFunction(arg1, arg2):
-  raise NotImplementedYet, "put code here..."
+        raise NotImplementedYet, "put code here..."
 ```
 ---
 # Resumptions
@@ -261,16 +261,17 @@ def myBuggyFunction(arg1, arg2):
   * ideal unit test
   * should be reported for each exception
   * usually should pick innermost resumption
+
 ```python
 def resumable(logger=print):
-    "This function is resumable upon exception."
-    def _wrapped(func, *args, **kwargs):
-        try:
-            func(*args, **kwargs)
-        except Exception:
-            printResumption(logger, func, args, kwargs)
-            raise
-    return decorator(_wrapped)
+        "This function is resumable upon exception."
+        def _wrapped(func, *args, **kwargs):
+                 try:
+                        func(*args, **kwargs)
+                 except Exception:
+                        printResumption(logger, func, args, kwargs)
+                        raise
+        return decorator(_wrapped)
 ```
 ---
 # Resumptions
@@ -289,11 +290,11 @@ def printResumption(func, args, kwargs, logger=print):
     formalArgs = []
     argNames = code.co_varnames[:code.co_argcount]
     namedArgs = (list(zip(code.co_varnames[:code.co_argcount], args)) +
-                 list(kwargs.items()))
+             list(kwargs.items()))
     for (argName, argValue) in namedArgs:
-        (varDecl, formalArg) = store(argValue, argName)
-        varDecls.append(varDecl)
-        formalArgs.append(formalArg)
+            (varDecl, formalArg) = store(argValue, argName)
+            varDecls.append(varDecl)
+            formalArgs.append(formalArg)
     call = func.__qualname__ + "(" + ",".join(formalArgs) + ")"
     varDecls.append(call)
     logger("\n".join(varDecls))
@@ -303,9 +304,9 @@ def printResumption(func, args, kwargs, logger=print):
 
 ```python
 def test_1():
-	alpha = 'alphabetic, but not frenetic, crowdy, but not bawdy"
-	beta  = readAlignment("input.fas")
-	sampleFun(1, alpha, beta)
+    alpha = 'alphabetic, but not frenetic, crowdy, but not bawdy"
+    beta  = readAlignment("input.fas")
+    sampleFun(1, alpha, beta)
 ```
 
 ```
