@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Title</title>
+    <meta charset="utf-8">
+    <style>
+      @import url(https://fonts.googleapis.com/css?family=Yanone+Kaffeesatz);
+      @import url(https://fonts.googleapis.com/css?family=Droid+Serif:400,700,400italic);
+      @import url(https://fonts.googleapis.com/css?family=Ubuntu+Mono:400,700,400italic);
+
+      body { font-family: 'Droid Serif'; }
+      h1, h2, h3 {
+        font-family: 'Yanone Kaffeesatz';
+        font-weight: normal;
+      }
+      .remark-code, .remark-inline-code { font-family: 'Ubuntu Mono'; }
+      img { width: 100%; }
+    </style>
+  </head>
+  <body>
+    <textarea id="source">
+
+class: center, middle
+
+# Debugging multi-gigabyte thousand cpu-hours analyses with Python decorators
+
+## Michal J. Gajda
+---
+# Plan
+
+# Intro
+# Problem
+# Solution
+---
+# Plan
+
+# Intro
+* My background
+* Problem background
+* Types of bugs
+
+# Problem
+
+# Solution
+---
+# Plan
+
+# Intro
+
+# Problem
+* Debug cycle
+* Parallel runs
+
+# Solution
+---
+# Plan
+
+# Intro
+
+# Problem
+
+# Solution
+* Bug isolation
+* Summarizing runs
+* Who writest the tests
+---
+# Intro
+
+# Scientific computing
+
+# Programming:
+* exploratory
+* test-driven
+* data-driven
+
+# Data analysis:
+* visual
+* statistical
+...
+---
+# Data analysis
+
+# Human analytic capacities
+
+| Method             | Focused capacity                           |
+|--------------------|--------------------------------------------|
+| human memory       | few kilobytes per second                   |
+| long term memory   | few pieces per day                         |
+| reading            | 1-20 words per second                      |
+| sound              | few words per second (less than reading)   |
+| graphics           | ~1-4Mpixel per second (for 1 frame/second) |
+| automatic analysis | everything beyond that                     |
+
+* GB of logs
+
+---
+# Background
+
+# Structure-function relationship
+
+![Sequence to structure diagram](sequenceToPhenotype.png)
+
+## Anfinsen thesis
+
+# Homology
+---
+# Background
+
+# Structure-function relationship
+
+# Homology
+![Example image](http://persweb.wabash.edu/facstaff/novakw/ssf.jpg)
+---
+# Protein modeling
+
+# Pipeline
+
+![Protein modeling pipeline diagram](modelingPipeline.png)
+
+# CASP
+
+* Competition on Automated Structure Prediction
+---
+# Programming process
+
+![Programming process](progProcess.svg) 
+
+# Programming is...?
+  * specifying desired behaviour
+  * exploring possible technical solutions
+  * verifying assumptions
+  * validating computational science hypotheses
+  * automating solutions
+---
+# Programming process
+
+![Programming process](progProcessInDetail.svg) 
+
+# Programming is...?
+  * specifying desired behaviour
+  * exploring possible technical solutions
+  * verifying assumptions
+  * validating computational science hypotheses
+  * automating solutions
+---
+# Naming types bugs
+
+# Problem naming:
+
+![Programming process](typesOfBugs.svg)
+---
+# Hierarchical view
+
+![Hierarchical decomposition of programming process](progProcessHierarchy.png)
+
+---
+# Bug fixing
+
+# Find the level:
+* of hierarchy where bug occurs,
+* component,
+* type,
+* define desired behaviour.
+
+# Technical goals:
+* minimize impact of bugs
+* feedback loop time
+* debug cycle
+---
+# Running the pipeline
+
+* Size of the data
+* Number of exceptions
+* Debug cycle issues
+* Division into stages
+  - each stage stores all outputs to filesystem at the end
+  - each stage can be replayed from previously stored data
+
+1. Download metaserver alignments.
+2. Download PDB structures.
+3. Build single-template models.
+4. Score and rank best single-template models.
+5. Create best multi-template alignments.
+6. Create variations of multi-template alignments.
+7. Score and rank multi-template alignments.
+8. Rank best multi-template models.
+9. Send results
+
+---
+# Finding root causes
+
+# Root cause analysis
+* Primary vs secondary (fallout) exceptions
+* Valid exceptions
+* Importance of exceptions
+  - statistical (number of occurences)
+  - behavioural (qualitative change in result)
+
+# Creating new tests
+---
+# Finding root causes - cycle
+
+# Run cycle:
+* Run on valid data set
+* Identify problems
+* Estimate problem impact
+* Isolate most important problems
+* Benchmarking change results (compare with previous run)
+
+# Isolation - making self-contained unit tests
+---
+# Prioritizing problems
+
+1. Report all problematic data ASAP:
+```python
+def function(input)
+    assert goodData(input)
+```
+2. Gather exception reports from all logs:
+```
+Traceback (most recent call last):
+  File "fib.py", line 9, in <module>
+      raise NotImplementedError("error here")
+      NotImplementedError: error here
+```
+3. Remember order of exceptions within each run.
+  * Exception report
+```python
+(1, "Traceback ...", [resumption1, resumption2])
+```
+4. Compare tracebacks between runs:
+  * usually enough to cut last line of traceback
+5. Sort by order within each run, *and* frequency.
+```bash
+tracebacker.py *.log -o runReport.txt -t newTests.py
+```
+---
+# Problem isolation from within long runs
+
+* History of checkpointing
+  - CRAY
+  - MD and QM simulations
+  - Core dumps
+  - Perl dumps
+  - Temporal debugging (e.g. like UndoDB)
+* Checkpointing vs resumptions
+  - define data formats for examination
+  - minimal unit test isolation
+
+```python
+@resumable()
+def myBuggyFunction(arg1, arg2):
+        raise NotImplementedYet, "put code here..."
+```
+---
+# Resumptions
+
+# Resumption
+  * allows to resume program fragment that crashed
+  * call to a function with arguments from previous run
+  * ideal unit test
+  * should be reported for each exception
+  * usually should pick innermost resumption
+
+```python
+def resumable(logger=print):
+        "This function is resumable upon exception."
+        def _wrapped(func, *args, **kwargs):
+                 try:
+                        func(*args, **kwargs)
+                 except Exception:
+                        printResumption(logger, func, args, kwargs)
+                        raise
+        return decorator(_wrapped)
+```
+---
+# Resumptions
+
+1. Save inputs
+2. Identify call
+3. Save exception
+4. Resumptions as unit tests
+5. Upgrade tracebacker.py to deal with resumptions
+
+```python
+def printResumption(func, args, kwargs, logger=print):
+    "Prints a resumption: function call with all its arguments."
+    code = func.__code__
+    varDecls   = []
+    formalArgs = []
+    argNames = code.co_varnames[:code.co_argcount]
+    namedArgs = (list(zip(code.co_varnames[:code.co_argcount], args)) +
+             list(kwargs.items()))
+    for (argName, argValue) in namedArgs:
+            (varDecl, formalArg) = store(argValue, argName)
+            varDecls.append(varDecl)
+            formalArgs.append(formalArg)
+    call = func.__qualname__ + "(" + ",".join(formalArgs) + ")"
+    varDecls.append(call)
+    logger("\n".join(varDecls))
+```
+---
+# Example resumption
+
+```python
+def test_1():
+    alpha = 'alphabetic, but not frenetic, crowdy, but not bawdy"
+    beta  = readAlignment("input.fas")
+    sampleFun(1, alpha, beta)
+```
+
+```
+http://github.com/mgajda/pyresumptions
+```
+---
+# Conclusion
+
+# Strengths of Python:
+* rapid development
+* easy gluing
+* metamodel for execution
+* decorators
+  - aspect-oriented programming
+  - meta-level code
+* dynamic typing
+
+# Novel software development practices...
+
+---
+# Conclusion
+
+# Strengths of Python...
+# Novel software development practices
+* Data driven development:
+  - Input data drives development
+  - Hypothesis drives next development
+  - Quickly explore hypotheses
+    * code is *only partially correct* at all times
+* Automatic problem isolation
+* Automatic unit test provisioning
+
+    </textarea>
+    <script src="https://gnab.github.io/remark/downloads/remark-latest.min.js">
+    <!--script src="remark/src/remark.js"-->
+    </script>
+    <script>
+      var slideshow = remark.create();
+    </script>
+  </body>
+</html>
